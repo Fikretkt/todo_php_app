@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PHP Todo Uygulaması</title>
+  <style>
+    body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
+    input { padding: 10px; width: 80%; }
+    button { padding: 10px; }
+    ul { padding: 0; list-style: none; }
+    li { padding: 8px 0; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+  <h2>Yapılacaklar Listesi</h2>
+
+  <input type="text" id="todoInput" placeholder="Yeni yapılacak...">
+  <button onclick="addTodo()">Ekle</button>
+
+  <ul id="todoList"></ul>
+
+  <script>
+    // Verileri getir
+   async function loadTodos() {
+  const response = await fetch("index.php");
+  const todos = await response.json();
+
+  const list = document.getElementById("todoList");
+  list.innerHTML = "";
+
+  todos.forEach(todo => {
+    const li = document.createElement("li");
+    li.textContent = `${todo.text} (${todo.created_at})`;
+
+    // Silme butonu
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "❌";
+    delBtn.style.marginLeft = "10px";
+    delBtn.onclick = () => deleteTodo(todo.id);
+
+    li.appendChild(delBtn);
+    list.appendChild(li);
+  });
+}
+
+
+
+    // Yeni todo ekle
+    async function addTodo() {
+      const input = document.getElementById("todoInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      await fetch("index.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      input.value = "";
+      loadTodos(); // Listeyi güncelle
+    }
+
+    // Sayfa yüklenince listeyi göster
+    loadTodos();
+  </script>
+  <script>
+  // Daha önce yazdığımız fonksiyonlar...
+
+  async function deleteTodo(id) {
+    await fetch("index.php", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id })
+    });
+
+    loadTodos(); // Listeyi güncelle
+  }
+
+  // Diğer fonksiyonlar...
+</script>
+
+</body>
+</html>
